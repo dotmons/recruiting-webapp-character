@@ -89,6 +89,11 @@ function Character({ data }) {
     const saveCharacter = () => {
         console.log('attributes: ', attributes);
 
+        const jsonResult = [{
+            'attributes': attributes,
+            //'skills': ski
+        }]
+
         fetch(APIURL, {
             method: "POST",
             headers: {
@@ -192,9 +197,10 @@ function Character({ data }) {
             console.log("Data is an empty object.");
           } else {
             setAttributes(data);
+            updateTotalState(attributes);
           }
 
-    }, [data])
+    }, [data, attributes])
 
     // JSX
     return (

@@ -4,6 +4,7 @@ import { APIURL } from "../consts";
 
 export default function CharacterList() {
     const [characters, setCharacters] = useState([]);
+    const [allAttributes, setAllAttributes] = useState([]);
 
     // 🔹 Function to Add an Empty Character
     const addCharacter = () => {
