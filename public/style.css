@@ -1,0 +1,68 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0px;
+    border: 3px solid #333; /* Border for shading effect */
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+    max-width: 1000px;
+    margin: 20px auto; /* Centers the section */
+}
+
+.containerskill {
+    flex-direction: column;
+    padding: 20px;
+    border: 3px solid #333; /* Border for shading effect */
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+    max-width: 600px;
+    margin: 20px auto; /* Centers the section */
+}
+
+.title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.itemsWrapper {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.item {
+    flex: 1;
+    min-width: 350px;
+    padding: 15px;
+    border: 2px solid #555;
+    text-align: center;
+    font-size: 13px;
+    border-radius: 5px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); /* Light shadow for effect */
+}
+
+.itemAttributes {
+    flex: 1;
+    min-width: 230px;
+    padding: 15px;
+    border: 2px solid #555;
+    text-align: center;
+    font-size: 13px;
+    border-radius: 5px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); /* Light shadow for effect */
+}
+
+.itemClasses {
+    flex: 1;
+    min-width: 100px;
+    padding: 15px;
+    border: 2px solid #555;
+    text-align: center;
+    font-size: 13px;
+    border-radius: 5px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); /* Light shadow for effect */
+}

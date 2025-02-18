@@ -57,3 +57,8 @@ export const SKILL_LIST = [
     { name: 'Survival', attributeModifier: 'Wisdom' },
 
 ]
+
+
+
+export const GITHUBUSERNAME = "dotmons";
+export const APIURL = `https://recruiting.verylongdomaintotestwith.ca/api/${GITHUBUSERNAME}/character`;
