@@ -39,8 +39,8 @@ export default function CharacterList() {
                     console.error("Error: API returned an empty object.");
                     return;
                 }
-                console.log("Retrieved Character:", data.body);
-                setCharacters([data.body]); 
+                //console.log("Retrieved Character:", data.body[0]);
+                setCharacters([data.body[0]]); 
             })
             .catch(error => console.error("Error retrieving character:", error));
     };

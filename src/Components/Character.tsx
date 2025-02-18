@@ -91,7 +91,7 @@ function Character({ data }) {
 
         const jsonResult = [{
             'attributes': attributes,
-            //'skills': ski
+            'skills': skills
         }]
 
         fetch(APIURL, {
@@ -99,7 +99,7 @@ function Character({ data }) {
             headers: {
               "Content-Type": "application/json"
             },
-            body: JSON.stringify(attributes)
+            body: JSON.stringify(jsonResult)
           })
             .then(response => response.json())
             .then(data => console.log("Character saved:", data))
@@ -196,7 +196,8 @@ function Character({ data }) {
           if (isEmptyObject(data)) {
             console.log("Data is an empty object.");
           } else {
-            setAttributes(data);
+            setAttributes(data.attributes);
+            setSkills(data.skills)
             updateTotalState(attributes);
           }
 
