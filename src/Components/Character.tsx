@@ -3,7 +3,8 @@ import { SKILL_LIST, ATTRIBUTE_LIST, CLASS_LIST, APIURL } from '../consts';
 
 
 
-function Character({ data }) {
+function Character({ data, index, onStateChange }) {
+
 
     // UseRef Declarations:
     const dcValueRef = useRef(null);
@@ -22,9 +23,12 @@ function Character({ data }) {
         'Wizard': false,
         'Bard': false,
     });
+
+
     const [attributes, setAttributes] = useState(
         ATTRIBUTE_LIST.reduce((acc, attr) => ({ ...acc, [attr]: 10 }), {})
     );
+
     const [skills, setSkills] = useState<{ [key: string]: number }>(
         SKILL_LIST.reduce((acc, skill) => ({ ...acc, [skill.name]: 0 }), {})
     );
@@ -32,7 +36,11 @@ function Character({ data }) {
     const [skillsCheck, setSkillsCheck] = useState(
         SKILL_LIST.reduce((acc, skill) => ({ ...acc, [skill.name]: 0 }), {})
     );
+
+
+
     const [modifiers, setModifiers] = useState<any>({
+
         Strength: 0,
         Dexterity: 0,
         Constitution: 0,
@@ -40,6 +48,7 @@ function Character({ data }) {
         Wisdom: 0,
         Charisma: 0,
     });
+
     const [total, setTotal] = useState(0);
     const [totalSkill, setTotalSkill] = useState(0);
     const [totalSkillPoint, setTotalSkillPoint] = useState(10);
@@ -48,6 +57,8 @@ function Character({ data }) {
     const calculateModifier = (value: number): number => Math.floor((value - 10) / 2);
 
     const updateModifiers = (newAttributes: { [key: string]: number }) => {
+
+
         const newModifiers = Object.keys(newAttributes).reduce((acc, attr) => {
             acc[attr] = calculateModifier(newAttributes[attr]);
             return acc;
@@ -112,6 +123,10 @@ function Character({ data }) {
     };
 
     const increaseSkill = (attr: string) => {
+        if (total >= 70) {
+            alert('A character cannot have more than 70 assigned attributes');
+            return
+        }
         setAttributes((prev) => {
             const newAttributes = { ...prev, [attr]: total < 70 ? prev[attr] + 1 : prev[attr] };
             updateTotalState(newAttributes);
@@ -128,6 +143,12 @@ function Character({ data }) {
     };
 
     const increaseSkillsAttribute = (skill: string) => {
+
+        if (totalSkill >= totalSkillPoint) {
+            alert(`Total points cannot exceed ${totalSkillPoint}`);
+            return;
+        }
+
         setSkills((prev) => ({
             ...prev,
             [skill]: totalSkill < totalSkillPoint ? prev[skill] + 1 : prev[skill],
@@ -165,12 +186,9 @@ function Character({ data }) {
         return Object.keys(obj).length === 0;
       };
 
-    // useEffect 
+    
+      // Initiated only after attributes is updated
     useEffect(() => {
-        if (total >= 70) {
-            alert('A character cannot have more than 70 assigned attributes');
-        }
-
         updateSkillSet();
         updateSkillsCheck();
     }, [attributes]);
@@ -179,11 +197,6 @@ function Character({ data }) {
         const newTotal: number = Object.values(skills).reduce((acc: number, value: number) => acc + value, 0);
 
         setTotalSkill(newTotal);
-
-        if (totalSkill >= totalSkillPoint) {
-            alert(`Total points cannot exceed ${totalSkillPoint}`);
-        }
-
         updateSkillsCheck();
     }, [skills]);
 
@@ -198,10 +211,21 @@ function Character({ data }) {
           } else {
             setAttributes(data.attributes);
             setSkills(data.skills)
-            updateTotalState(attributes);
+            updateTotalState(data.attributes);
           }
 
-    }, [data, attributes])
+    }, [])
+
+
+    useEffect(() =>{
+        const jsonResult = [{
+            'attributes': attributes,
+            'skills': skills
+        }]
+
+        onStateChange(index, jsonResult)
+    }, [attributes, skills])
+
 
     // JSX
     return (
