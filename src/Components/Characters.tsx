@@ -3,46 +3,9 @@ import { SKILL_LIST, ATTRIBUTE_LIST, CLASS_LIST, APIURL } from '../consts';
 
 
 
-function Character({ data, onStateSave, ind, reducers }) {
+function Character({ data, onStateSave, ind }) {
 
-
-
-
-    const reducer = (state, action) => {
-        switch (action.type) {
-            case 'UPDATEATTRIBUTES':
-
-                const attlist = state.reducerAttributes.map((value) => {
-
-                    if (action.payload===value.redAttrListName){
-                        const temp =  { ...value, redAttrListValue: value.redAttrListValue + 1 }
-                        temp.redModifierValue =  Math.floor((temp.redAttrListValue - 10) / 2)
-
-                        return temp;
-                    }
-                    else{
-                        return value
-                    }
-                 
-        })
-                
-
-                //   value.redAttrListName === action.payload ? { ...value, redAttrListValue: value.redAttrListValue + 1 
-          //  } : value
-//value.redModifierValue = Math.floor((value.redModifierValue - 10) / 2)
-
-
-                return { ...state, reducerAttributes: attlist }
-
-            default:
-                return state
-        }
-    }
-
-
-
-
-
+  
     // UseRef Declarations:
     const dcValueRef = useRef(null);
 
@@ -81,6 +44,10 @@ function Character({ data, onStateSave, ind, reducers }) {
     const [total, setTotal] = useState(0);
     const [totalSkill, setTotalSkill] = useState(0);
     const [totalSkillPoint, setTotalSkillPoint] = useState(10);
+
+
+
+
 
     // Helper Functions
     const calculateModifier = (value: number): number => Math.floor((value - 10) / 2);
@@ -149,18 +116,12 @@ function Character({ data, onStateSave, ind, reducers }) {
         setSelectedSkill(event.target.value);
     };
 
-
-
     const increaseSkill = (attr: string) => {
-
-
-        dispatch({ type: 'UPDATEATTRIBUTES', payload: attr })
-
         if (total >= 70) {
             alert('A character cannot have more than 70 assigned attributes');
         }
 
-
+        
         setAttributes((prev) => {
             const newAttributes = { ...prev, [attr]: total < 70 ? prev[attr] + 1 : prev[attr] };
             updateTotalState(newAttributes);
@@ -260,22 +221,12 @@ function Character({ data, onStateSave, ind, reducers }) {
 
     }, [attributes, skills])
 
-
-    const [redstate, dispatch] = useReducer(reducer, reducers)
-
-
-    useEffect(() => {
-
-        console.log('redstate ', redstate)
-    }, [redstate])
-
-
     // JSX
     return (
 
         <section className="App-section">
             <div className="container">
-                <h2 className="title">Character {ind + 1}</h2>
+                <h2 className="title">Character {ind+1}</h2>
                 <p>Skill: {result.Skill}</p>
                 <p>Rolled Number: {result['Rolled Number']}</p>
                 <p>DC Value: {result['DC Value']}</p>
