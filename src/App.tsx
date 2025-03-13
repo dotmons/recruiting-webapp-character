@@ -10,10 +10,9 @@ function App() {
         <h1>React Coding Exercise - Adeoye Oludotun</h1>
       </header>
 
-      <CharacterList></CharacterList>
-
-    </div>
-  );
+      <CharacterList/>
+      </div>
+  )
 }
 
 export default App;

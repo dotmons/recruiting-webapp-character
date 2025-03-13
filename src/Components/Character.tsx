@@ -1,273 +1,368 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { SKILL_LIST, ATTRIBUTE_LIST, CLASS_LIST, APIURL } from '../consts';
+import { useEffect, useReducer, useRef } from 'react';
+import {CLASS_LIST } from '../consts';
 
 
 
-function Character({ data }) {
 
-    // UseRef Declarations:
-    const dcValueRef = useRef(null);
 
-    // State Declarations
-    const [result, setResult] = useState({
-        Skill: '',
-        'Rolled Number': 0,
-        'DC Value': 0,
-        Result: '',
-    });
 
-    const [selectedSkill, setSelectedSkill] = useState(SKILL_LIST[0].name);
-    const [skillSet, setSkillSet] = useState({
-        'Barbarian': false,
-        'Wizard': false,
-        'Bard': false,
-    });
-    const [attributes, setAttributes] = useState(
-        ATTRIBUTE_LIST.reduce((acc, attr) => ({ ...acc, [attr]: 10 }), {})
-    );
-    const [skills, setSkills] = useState<{ [key: string]: number }>(
-        SKILL_LIST.reduce((acc, skill) => ({ ...acc, [skill.name]: 0 }), {})
-    );
+function Character({ indx, data, onStateChange }) {
 
-    const [skillsCheck, setSkillsCheck] = useState(
-        SKILL_LIST.reduce((acc, skill) => ({ ...acc, [skill.name]: 0 }), {})
-    );
-    const [modifiers, setModifiers] = useState<any>({
-        Strength: 0,
-        Dexterity: 0,
-        Constitution: 0,
-        Intelligence: 0,
-        Wisdom: 0,
-        Charisma: 0,
-    });
-    const [total, setTotal] = useState(0);
-    const [totalSkill, setTotalSkill] = useState(0);
-    const [totalSkillPoint, setTotalSkillPoint] = useState(10);
 
-    // Helper Functions
-    const calculateModifier = (value: number): number => Math.floor((value - 10) / 2);
 
-    const updateModifiers = (newAttributes: { [key: string]: number }) => {
-        const newModifiers = Object.keys(newAttributes).reduce((acc, attr) => {
-            acc[attr] = calculateModifier(newAttributes[attr]);
-            return acc;
-        }, {});
-        return newModifiers;
-    };
+    // Reducer function
+    const reducer = (state, action) => {
+        switch (action.type) {
+            case 'INCREASEATTRIBUTES':
 
-    const updateSkillsCheck = () => {
-        const newSkillsCheck = SKILL_LIST.reduce((acc, skill) => {
-            acc[skill.name] = modifiers[skill.attributeModifier] + skills[skill.name];
-            return acc;
-        }, {});
-        setSkillsCheck(newSkillsCheck);
-    };
-
-    const updateTotalState = (newAttributes: { [key: string]: number }) => {
-        const newTotal = Object.values(newAttributes).reduce((acc, value) => acc + value, 0);
-        setTotal(newTotal);
-        setModifiers(updateModifiers(newAttributes));
-        setTotalSkillPoint(10 + 4 * modifiers.Intelligence);
-    };
-
-    const updateSkillSet = () => {
-        const updatedSkill = { ...skillSet };
-        for (const className in CLASS_LIST) {
-            const classAttributes = CLASS_LIST[className];
-            let isClassTrue = true;
-            for (const attribute in classAttributes) {
-                if (attributes[attribute] < classAttributes[attribute]) {
-                    isClassTrue = false;
-                    break;
+                if (state.attributeData.totalValue >= 70) {
+                    alert('Total sum cannot be greater than 70')
+                    return state;
                 }
-            }
-            updatedSkill[className] = isClassTrue;
+
+                const attValue = state.attributeData.attributeValues.map((value, index) => {
+                    if (action.payload === index) {
+                        const attval = { ...value, attributevalue: value.attributevalue + 1 }
+                        attval.modifier = Math.floor((attval.attributevalue - 10) / 2)
+                        return attval
+                    }
+                    return value
+                })
+
+                let sum = 0;
+
+
+                attValue.map((value) => {
+                    sum += value.attributevalue
+                })
+
+
+                let attributeDataresulta = {
+                    totalValue: sum,
+                    attributeValues: attValue
+                }
+
+                return {
+                    ...state,
+                    attributeData: attributeDataresulta
+
+                }
+
+            case 'DECREASEATTRIBUTES':
+                const attres = state.attributeData.attributeValues.map((value, index) => {
+                    if (action.payload === index) {
+                        if (value.attributevalue <= 0) {
+                            alert('Attribute value cannot be less than 0')
+                            return value
+                        }
+                        const attval = { ...value, attributevalue: value.attributevalue - 1 }
+                        attval.modifier = Math.floor((attval.attributevalue - 10) / 2)
+                        return attval
+                    }
+                    return value
+                })
+
+                let totalvaless = attres.reduce((sum, value) =>
+                    sum + value.attributevalue, 0
+                )
+
+                let attributeDataresult = {
+                    totalValue: totalvaless,
+                    attributeValues: attres
+                }
+
+                return {
+                    ...state,
+                    attributeData: attributeDataresult
+
+                }
+
+            case 'CLASSSETTINGS':
+
+                const getAttributeByName = (name) => state.attributeData.attributeValues.find(attr => attr.name === name);
+                const getClassUpdateName = (ind) => {
+                    for (const attr in Object.values(CLASS_LIST)) {
+
+                        if (ind == attr) {
+
+                            let isTrue = true;
+                            for (const key in Object.values(CLASS_LIST)[attr]) {
+                                if (getAttributeByName(key).attributevalue < Object.values(CLASS_LIST)[attr][key]) {
+                                    isTrue = false;
+                                    break;
+                                }
+                            }
+                            return isTrue;
+                        }
+                    }
+                }
+
+                // const getClassUpdateName = (ind) => {
+
+                //     return state.classData.some((value, index) => {
+
+                //         if (ind == index) {
+
+                //             let attrSkills = value[1];
+                //             let inx = 0;
+                //             let isTrue = true;
+                //             for (const key in attrSkills) {
+
+                //                 if (state.attributeData.attributeValues[inx].attributevalue < attrSkills[key]) {
+                //                     isTrue = false;
+                //                     break;
+                //                 }
+                //                 inx++;
+                //             }
+                //             return isTrue;
+                //         }
+
+                //     })
+                // }
+
+                //classlistimport
+                //const isGreater = Object.keys(arr1).every(key => arr1[key] > arr2[key]);
+
+
+
+                const updatedClassData = state.classData.map((value, index) => {
+                    const isTrue = getClassUpdateName(index);
+                    return { ...value, classValue: isTrue };
+                });
+
+                return { ...state, classData: updatedClassData };
+
+
+            case 'TOTALSKILLPOINTS':
+                const totalSkillPoints = 10 + state.attributeData.attributeValues.find((att) => att.name === 'Intelligence').modifier * 4;
+                return { ...state, skillData: { ...state.skillData, totalSkillPoints: totalSkillPoints } };
+
+
+            case 'SKILLSATTRIBUTESADDITION':
+                const skillResult = state.skillData.skillListResult.map((value, index) => {
+                    if (action.payload === index) {
+                        const addskill = {
+                            ...value, nameValue: value.nameValue + 1
+                        }
+                        addskill.totalValue = addskill.nameValue + addskill.modifierValue
+                        return addskill
+                    }
+                    else {
+                        return value
+                    }
+                })
+
+                return {
+                    ...state,
+                    skillData: {
+                        ...state.skillData, skillListResult: skillResult
+                    }
+                }
+
+            case 'SKILLSATTRIBUTESSUBTRACTION':
+
+                const skillDecrease = state.skillData.skillListResult.map((value, index) => {
+
+                    if (action.payload === index) {
+                        const subSkill = { ...value, nameValue: value.nameValue - 1 }
+                        subSkill.totalValue = subSkill.nameValue + subSkill.modifierValue
+                        return subSkill
+                    }
+                    else {
+                        return value
+                    }
+                })
+
+
+                return {
+                    ...state, skillData: {
+                        ...state.skillData, skillListResult: skillDecrease
+                    }
+                }
+
+            // To sum up the total skills in the SKILLS section
+            case 'SKILLSUMS':
+
+                const totalSkills = state.skillData.skillListResult.map((value, index) => {
+                    return { ...value, totalValue: value.nameValue + value.modifierValue }
+                })
+
+                return {
+                    ...state, skillData: {
+                        ...state.skillData, skillListResult: totalSkills
+                    }
+                }
+
+
+            // To update skill modifier based on the attributes
+
+            case 'ATTRIBUTESKILLS':
+
+
+                const skillmod = state.skillData.skillListResult.map((value, index) => {
+
+                    const result = state.attributeData.attributeValues.find((attr) => attr.name === value.attributeModifier);
+
+                    return { ...value, modifierValue: result.modifier }
+
+                })
+
+                return {
+                    ...state, skillData: {
+                        ...state.skillData, skillListResult: skillmod
+                    }
+                }
+
+            case 'GENERATERESULT':
+                const rolledNumber = Math.floor(Math.random() * 20) + 1;
+                const dcValue = dcval.current.value
+                const skillValue = skillsval.current.value
+                const skillVal = state.skillData.skillListResult.find((attr) => attr.name === skillValue)
+
+                const result = {
+
+                    skill: skillValue + ' : ' + skillVal.totalValue,
+                    rolledNumber: rolledNumber,
+                    dcValue: dcValue,
+                    result: (rolledNumber + skillVal.totalValue) > dcValue ? 'PASS' : 'FAILURE'
+                }
+
+                return {
+                    ...state, charPlayers: result
+                }
+
+            default:
+                return state
+
         }
-        setSkillSet(updatedSkill);
-    };
-
-    const saveCharacter = () => {
-        console.log('attributes: ', attributes);
-
-        const jsonResult = [{
-            'attributes': attributes,
-            'skills': skills
-        }]
-
-        fetch(APIURL, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify(jsonResult)
-          })
-            .then(response => response.json())
-            .then(data => console.log("Character saved:", data))
-            .catch(error => console.error("Error saving character:", error));
     }
 
-    // Event Handlers
-    const handleSkillChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        setSelectedSkill(event.target.value);
-    };
 
-    const increaseSkill = (attr: string) => {
-        setAttributes((prev) => {
-            const newAttributes = { ...prev, [attr]: total < 70 ? prev[attr] + 1 : prev[attr] };
-            updateTotalState(newAttributes);
-            return newAttributes;
-        });
-    };
 
-    const decreaseSkill = (attr: string) => {
-        setAttributes((prev) => {
-            const newAttributes = { ...prev, [attr]: prev[attr] > 0 ? prev[attr] - 1 : 0 };
-            updateTotalState(newAttributes);
-            return newAttributes;
-        });
-    };
 
-    const increaseSkillsAttribute = (skill: string) => {
-        setSkills((prev) => ({
-            ...prev,
-            [skill]: totalSkill < totalSkillPoint ? prev[skill] + 1 : prev[skill],
-        }));
-    };
+    // function implementation
+    const increaseAttributes = (value) => {
+        //console.log('target: ', value)
+        dispatch({ type: "INCREASEATTRIBUTES", payload: value })
+        dispatch({ type: "CLASSSETTINGS" })
+        dispatch({ type: "TOTALSKILLPOINTS", payload: value })
+        dispatch({ type: "ATTRIBUTESKILLS", payload: value })
+        dispatch({ type: "SKILLSUMS" })
+    }
 
-    const decreaseSkillsAttribute = (skill: string) => {
-        setSkills((prev) => ({
-            ...prev,
-            [skill]: prev[skill] > 0 ? prev[skill] - 1 : 0,
-        }));
-    };
+    const decreaseAttributes = (value) => {
+        //console.log("decrease: ", value)
+        dispatch({ type: "DECREASEATTRIBUTES", payload: value })
+        dispatch({ type: "CLASSSETTINGS" })
+        dispatch({ type: "TOTALSKILLPOINTS", payload: value })
+        dispatch({ type: "ATTRIBUTESKILLS", payload: value })
+        dispatch({ type: "SKILLSUMS" })
+    }
 
-    const runCharacter = () => {
-        const allFalse = Object.values(skillSet).every((value) => value === false);
 
-        if (allFalse) {
-            alert('One skill is required to be satisfied to play the game');
-            return;
-        }
+    const incrementSkill = (value) => {
+        dispatch({ type: "SKILLSATTRIBUTESADDITION", payload: value })
+    }
 
-        const dcValue = Number(dcValueRef.current.value) || 0;
-        const randomValue = Math.floor(Math.random() * 20) + 1;
-        const selectedSkillValueCheck = skillsCheck[selectedSkill];
+    const decreaseSkill = (value) => {
+        dispatch({ type: "SKILLSATTRIBUTESSUBTRACTION", payload: value })
+    }
 
-        setResult({
-            Skill: `${selectedSkill} : ${selectedSkillValueCheck}`,
-            'Rolled Number': randomValue,
-            'DC Value': dcValue,
-            Result: selectedSkillValueCheck + randomValue >= dcValue ? 'Success' : 'Failure',
-        });
-    };
+    function roll() {
 
-    const isEmptyObject = (obj: Record<string, any>): boolean => {
-        return Object.keys(obj).length === 0;
-      };
+        dispatch({ type: 'GENERATERESULT' })
 
-    // useEffect 
-    useEffect(() => {
-        if (total >= 70) {
-            alert('A character cannot have more than 70 assigned attributes');
-        }
+    }
 
-        updateSkillSet();
-        updateSkillsCheck();
-    }, [attributes]);
+
+    const dcval = useRef(null)
+    const skillsval = useRef(null)
+    const [state, dispatch] = useReducer(reducer, data);
 
     useEffect(() => {
-        const newTotal: number = Object.values(skills).reduce((acc: number, value: number) => acc + value, 0);
+        onStateChange(indx, state);
+        //console.log('id before', indx, 'new state> ', state)
+    }, [state]);
 
-        setTotalSkill(newTotal);
 
-        if (totalSkill >= totalSkillPoint) {
-            alert(`Total points cannot exceed ${totalSkillPoint}`);
-        }
 
-        updateSkillsCheck();
-    }, [skills]);
 
-    useEffect(() =>{
-        if (typeof data !== "object" || data === null) {
-            console.log("Invalid data: Not an object.");
-            return;
-          }
-        
-          if (isEmptyObject(data)) {
-            console.log("Data is an empty object.");
-          } else {
-            setAttributes(data.attributes);
-            setSkills(data.skills)
-            updateTotalState(attributes);
-          }
-
-    }, [data, attributes])
-
-    // JSX
     return (
-       
-        <section className="App-section">
-            <div className="container">
-                <h2 className="title">Character</h2>
-                <p>Skill: {result.Skill}</p>
-                <p>Rolled Number: {result['Rolled Number']}</p>
-                <p>DC Value: {result['DC Value']}</p>
-                <p>Result: {result.Result}</p>
 
-                <div className="containerskill">
-                    <h3>Skill Check: </h3>
-                    <select id="skills" value={selectedSkill} onChange={handleSkillChange}>
-                        {SKILL_LIST.map((skill) => (
-                            <option key={skill.name} value={skill.name}>
-                                {skill.name}
-                            </option>
-                        ))}
-                    </select>
-                    <label>DC:</label>
-                    <input type="number" ref={dcValueRef} defaultValue={10} />
-                    <button onClick={runCharacter}>Roll</button>
+            <section className="App-section">
+                <div className="container">
+                    <h2 className="title">Character {indx + 1}</h2>
+                    <p>Skill: {state.charPlayers.skill} </p>
+                    <p>Rolled Number: {state.charPlayers.rolledNumber}</p>
+                    <p>DC Value: {state.charPlayers.dcValue}</p>
+                    <p>Result: {state.charPlayers.result}</p>
+
+                    <div className="containerskill">
+                        <h3>Skill Check: </h3>
+                        <select id={indx + 'skills'} name={indx + 'skills'} ref={skillsval}>
+
+                            {
+                                Array.isArray(state.skillData.skillListResult) && state.skillData.skillListResult.map((value, index) => (
+                                    <option key={index} value={value.name}> {value.name} </option>
+                                ))
+
+                            }
+
+                        </select>
+                        <div>DC:</div>
+                        <input type="number" ref={dcval} id={indx + 'dcvalue'} name={indx + 'dcvalue'}></input>
+                        <button onClick={roll}>Roll</button>
+                    </div>
+
+                    <div className="itemsWrapper">
+                        <div className="itemAttributes">
+                            <h3>Attributes</h3>
+
+                            {Array.isArray(state.attributeData.attributeValues) && state.attributeData.attributeValues.map((value, index) => (
+
+                                <div key={index}>
+                                    <div>{value.name}: {value.attributevalue} (Modifier: {value.modifier})
+                                        <button onClick={() => increaseAttributes(index)}>+</button>
+                                        <button onClick={() => decreaseAttributes(index)}>-</button>
+                                    </div>
+                                </div>
+
+
+                            ))}
+
+                        </div>
+
+                        <div className="itemClasses">
+                            <h3>Classes</h3>
+                            {Array.isArray(state.classData) && state.classData.map((value, index) => {
+                                //console.log(value.className, ' ', value.classValue)
+                                return (
+                                    <div key={index} style={{ color: value.classValue === true ? 'red' : 'white' }}>{value.className}</div>
+                                )
+                            })}
+
+                        </div>
+
+                        <div className="item">
+                            <h3>Skills</h3>
+                            <div>Total skill points available: {state.skillData.totalSkillPoints}</div>
+                            <br />
+                            {Array.isArray(state.skillData.skillListResult) && state.skillData.skillListResult.map((value, index) => {
+                                return (
+                                    <div key={index}> {value.name} : {value.nameValue} (Modifier: {value.attributeModifier}): {value.modifierValue}
+                                        <button onClick={() => incrementSkill(index)}>+</button>
+                                        <button onClick={() => decreaseSkill(index)}>-</button>
+                                        total: {value.totalValue}
+                                    </div>
+                                )
+                            })}
+
+                        </div>
+                    </div>
+                    
                 </div>
-
-                <div className="itemsWrapper">
-                    <div className="itemAttributes">
-                        <h3>Attributes</h3>
-                        {ATTRIBUTE_LIST.map((attr) => (
-                            <div key={attr}>
-                                {attr}: {attributes[attr]} (Modifier: {modifiers[attr]})
-                                <button onClick={() => increaseSkill(attr)}>+</button>
-                                <button onClick={() => decreaseSkill(attr)}>-</button>
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className="itemClasses">
-                        <h3>Classes</h3>
-                        {Object.entries(CLASS_LIST).map(([name]) => (
-                            <div key={name} style={{ color: skillSet[name] ? 'red' : 'white' }}>
-                                {name}
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className="item">
-                        <h3>Skills</h3>
-                        <div>Total skill points available: {totalSkillPoint}</div>
-                        {SKILL_LIST.map((skill) => (
-                            <div key={skill.name}>
-                                {skill.name}: {skills[skill.name]} (Modifier: {skill.attributeModifier}):{' '}
-                                {modifiers[skill.attributeModifier]}
-                                <button onClick={() => increaseSkillsAttribute(skill.name)}>+</button>
-                                <button onClick={() => decreaseSkillsAttribute(skill.name)}>-</button>
-                                <label>Total: {skillsCheck[skill.name]}</label>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-                <button onClick={saveCharacter}>Save</button>
-            </div>
-        </section>
-
-    );
+            </section>
+    )
 }
 
 export default Character;

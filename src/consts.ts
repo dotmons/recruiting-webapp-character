@@ -60,5 +60,5 @@ export const SKILL_LIST = [
 
 
 
-export const GITHUBUSERNAME = "dotmons";
-export const APIURL = `https://recruiting.verylongdomaintotestwith.ca/api/${GITHUBUSERNAME}/character`;
+export const GITHUBUSERNAME = "dotun";
+export const API_URL = `https://recruiting.verylongdomaintotestwith.ca/api/${GITHUBUSERNAME}/character`;
